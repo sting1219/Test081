@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun moveMainPage(user: FirebaseUser?) {
-
         // User is signed in
         if (user != null) {
             startActivity(Intent(this, FirstMainActivity::class.java))
