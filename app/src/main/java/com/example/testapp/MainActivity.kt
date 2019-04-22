@@ -149,11 +149,17 @@ class MainActivity : AppCompatActivity() {
         var credential = FacebookAuthProvider.getCredential(token?.token!!)
         auth?.signInWithCredential(credential)?.addOnCompleteListener{
             task->
-            println("task" + task.isSuccessful)
+            if(task.isSuccessful){
+                moveMainPage(auth?.currentUser)
+            }
         }?.addOnFailureListener{
             exception ->
-            println("exception" + exception.message)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        moveMainPage(auth?.currentUser)
     }
 
 
