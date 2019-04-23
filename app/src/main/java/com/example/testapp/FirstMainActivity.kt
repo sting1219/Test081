@@ -1,11 +1,16 @@
 package com.example.testapp
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.internal.BottomNavigationItemView
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_first_main.*
+import java.util.jar.Manifest
 
 class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -23,6 +28,9 @@ class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigation
             }
 
             R.id.action_add_photo -> {
+                if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    startActivity(Intent(this, AddPhotoActivity::class.java))
+                }
 
                 return true
             }
@@ -48,5 +56,7 @@ class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigation
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first_main)
         bottom_navigation.setOnNavigationItemSelectedListener(this)
+
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
     }
 }
