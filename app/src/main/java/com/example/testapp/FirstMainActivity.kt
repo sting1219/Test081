@@ -1,5 +1,6 @@
 package com.example.testapp
 
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
@@ -9,10 +10,16 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.MenuItem
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_first_main.*
 import java.util.jar.Manifest
 
 class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
+
+    var PICK_PROFILE_FROM_ALBUM = 10
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_home -> {
@@ -56,7 +63,24 @@ class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigation
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first_main)
         bottom_navigation.setOnNavigationItemSelectedListener(this)
+        bottom_navigation.selectedItemId = R.id.action_home
 
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == PICK_PROFILE_FROM_ALBUM && resultCode == Activity.RESULT_OK){
+            var imageUri = data?.data
+            var uid = FirebaseAuth.getInstance().currentUser!!.uid
+            FirebaseStorage.getInstance().reference.child("userProfileImages").child(uid).putFile(imageUri!!).addOnCompleteListener{
+                task ->
+                var url = task.result.downloadUrl.toString()
+                var map = HashMap<String, Any>()
+                map["image"] = url
+                FirebaseFirestore.getInstance().collection("profileImages").document(uid).set(map)
+            }
+        }
     }
 }
