@@ -10,6 +10,7 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.MenuItem
+import android.view.View
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -21,6 +22,8 @@ class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigation
     var PICK_PROFILE_FROM_ALBUM = 10
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        setToolbarDefault()
+
         when (item.itemId) {
             R.id.action_home -> {
                 var detailviewFragment = DetailviewFragment()
@@ -66,6 +69,12 @@ class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigation
         bottom_navigation.selectedItemId = R.id.action_home
 
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
+    }
+
+    fun setToolbarDefault(){
+        toolbar_btn_back.visibility = View.GONE
+        toolbar_username.visibility = View.GONE
+        toolbar_title_image.visibility = View.VISIBLE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

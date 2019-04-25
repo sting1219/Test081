@@ -6,8 +6,6 @@ import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
-import android.util.Base64
-import android.util.Log
 import android.widget.Toast
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
@@ -22,8 +20,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.*
 import kotlinx.android.synthetic.main.activity_main.*
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.util.*
 
 
@@ -38,6 +34,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
+
+        var gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("940434784009-7q51avhavjjrasjlu35pblpdq96tgjkt.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
+
+        googleSingInClient = GoogleSignIn.getClient(this,gso)
+        callbackManager = CallbackManager.Factory.create()
+
         email_login_button.setOnClickListener{
             createAndLoginEmail()
         }
@@ -49,14 +54,6 @@ class MainActivity : AppCompatActivity() {
         facebook_login_button.setOnClickListener{
             facebookLogin()
         }
-
-        var gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("940434784009-7q51avhavjjrasjlu35pblpdq96tgjkt.apps.googleusercontent.com")
-            .requestEmail()
-            .build()
-
-        googleSingInClient = GoogleSignIn.getClient(this,gso)
-        callbackManager = CallbackManager.Factory.create()
 
 //        printHashKey(this)
 
@@ -124,6 +121,12 @@ class MainActivity : AppCompatActivity() {
 
     fun firebaseAuthWithGoogle(account : GoogleSignInAccount){
         var credential = GoogleAuthProvider.getCredential(account.idToken, null)
+        auth?.signInWithCredential(credential)?.addOnCompleteListener {
+            task->
+            if(task.isSuccessful){
+                moveMainPage(auth?.currentUser)
+            }
+        }
     }
 
     fun facebookLogin(){
@@ -153,7 +156,7 @@ class MainActivity : AppCompatActivity() {
                 moveMainPage(auth?.currentUser)
             }
         }?.addOnFailureListener{
-            exception ->
+            //exception ->
         }
     }
 
@@ -169,6 +172,7 @@ class MainActivity : AppCompatActivity() {
 
         if(requestCode == GOOGLE_LOGIN_CODE) {
             var result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
+            println(result.status.toString())
             if(result.isSuccess){
                 var account = result.signInAccount
                 firebaseAuthWithGoogle(account!!)
