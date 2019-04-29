@@ -1,5 +1,6 @@
 package com.example.testapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -8,7 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
+import com.example.testapp.model.AlarmDTO
 import com.example.testapp.model.ContentDTO
+import com.facebook.share.model.AppInviteContent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_detail.view.*
@@ -16,10 +19,12 @@ import kotlinx.android.synthetic.main.item_detail.view.*
 
 class DetailviewFragment : Fragment(){
     var firestore : FirebaseFirestore? = null
+    var user : FirebaseAuth? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         firestore = FirebaseFirestore.getInstance()
+        user = FirebaseAuth.getInstance()
 
         var view =  LayoutInflater.from(inflater.context).inflate(R.layout.fragment_detail,container,false)
         view.detailviewfragment_recyclerview.adapter = DetailRecyclerviewAdapter()
@@ -100,6 +105,13 @@ class DetailviewFragment : Fragment(){
                 fragment.arguments = bundle
                 activity!!.supportFragmentManager.beginTransaction().replace(R.id.main_content,fragment).commit()
             }
+
+            viewHolder.detailviewitem_comment_imageview.setOnClickListener{v ->
+                var intent = Intent(v.context,CommentActivity::class.java)
+                intent.putExtra("contentUid",contentUidList[position])
+                startActivity(intent)
+
+            }
         }
 
         private fun favoriteEvent(position: Int){
@@ -115,11 +127,23 @@ class DetailviewFragment : Fragment(){
                     contentDTO?.favorites.remove(uid)
 
                 }else {
+                    //좋아요를 누르지 않은 상태 -> 누르는 상태
                     contentDTO?.favorites[uid] = true
                     contentDTO?.favoriteCount = contentDTO.favoriteCount + 1
+                    favoriteAlarm(contentDTOs[position].uid!!)
                 }
                 transaction.set(tsDoc,contentDTO)
             }
+        }
+        fun favoriteAlarm(destinationUid:String){
+            var alarmDTO = AlarmDTO()
+            alarmDTO.destinationUid = destinationUid
+            alarmDTO.userId = user?.currentUser?.email
+            alarmDTO.uid = user?.currentUser?.uid
+            alarmDTO.kind = 0
+            alarmDTO.timestamp = System.currentTimeMillis()
+
+            FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
         }
     }
 }

@@ -194,7 +194,7 @@ class UserFragment : Fragment() {
             return CustomViewHolder(imageview)
         }
 
-        inner class CustomViewHolder(var imageview: ImageView) : RecyclerView.ViewHolder(imageview) {
+        private inner class CustomViewHolder(var imageview: ImageView) : RecyclerView.ViewHolder(imageview) {
 
         }
 
