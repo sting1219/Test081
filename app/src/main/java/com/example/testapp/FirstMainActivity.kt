@@ -52,7 +52,11 @@ class FirstMainActivity : AppCompatActivity(), BottomNavigationView.OnNavigation
             }
 
             R.id.action_account -> {
+                var uid = FirebaseAuth.getInstance().currentUser?.uid
                 var userFragment = UserFragment()
+                var bundle = Bundle()
+                bundle.putString("destinationUid", uid)
+                userFragment.arguments = bundle
                 supportFragmentManager.beginTransaction().replace(R.id.main_content,userFragment).commit()
                 return true
             }
