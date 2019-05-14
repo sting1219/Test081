@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import com.example.testapp.model.AlarmDTO
 import com.example.testapp.model.ContentDTO
+import com.example.testapp.model.FollowDTO
 import com.facebook.share.model.AppInviteContent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -43,6 +44,19 @@ class DetailviewFragment : Fragment(){
 
             var uid = FirebaseAuth.getInstance().currentUser?.uid
 
+            firestore?.collection("users")?.document(uid!!)?.get()?.addOnCompleteListener {
+                task->
+                if(task.isSuccessful)
+                {
+                    var userDTO = task.result.toObject(FollowDTO::class.java)
+                    if(userDTO != null) {
+                        getContents(userDTO.followings)
+                    }
+                }
+            }
+        }
+
+        fun getContents(followers:MutableMap<String,Boolean>){
             firestore?.collection("images")?.orderBy("timestamp")?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 contentDTOs.clear()
                 contentUidList.clear()
@@ -51,7 +65,9 @@ class DetailviewFragment : Fragment(){
 
                 for(snapshot in querySnapshot!!.documents){
                     var item = snapshot.toObject(ContentDTO::class.java)
-                    contentDTOs.add(item)
+                    if(followers.keys.contains(item.uid)) {
+                        contentDTOs.add(item)
+                    }
                     contentUidList.add(snapshot.id)
                 }
 
